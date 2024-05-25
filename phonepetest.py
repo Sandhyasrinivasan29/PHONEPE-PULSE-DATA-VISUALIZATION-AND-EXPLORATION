@@ -7,6 +7,225 @@ import requests
 import json
 from PIL import Image
 
+
+# aggregated transaction
+path1 = "C:/Users/sandh/OneDrive/Desktop/phonepay project/pulse/data/aggregated/transaction/country/india/state/"
+
+agg_trans_list = os.listdir(path1)
+columns={"States":[], "Years":[], "Quarter":[], "Trans_type":[], "Trans_count":[], "Trans_amount":[] }
+for states in agg_trans_list:
+    states_path = path1 + states + "/"
+    agg_year_list = os.listdir(states_path)
+    
+    for year in agg_year_list:
+        year_path = states_path + year + "/"
+        agg_file_list = os.listdir(year_path)
+         
+        for file in agg_file_list:
+            file_path=year_path+file
+            data=open(file_path,"r")
+            X=json.load(data)
+
+            for i in X["data"]["transactionData"]:
+                name=i["name"]
+                count=i["paymentInstruments"][0]["count"]
+                amount=i["paymentInstruments"][0]["amount"]
+                columns["Trans_type"].append(name)
+                columns["Trans_count"].append(count)
+                columns["Trans_amount"].append(amount)
+                columns["States"].append(states)
+                columns["Years"].append(year)
+                columns["Quarter"].append(int(file.strip(".json")))
+
+agg_trans=pd.DataFrame(columns)
+
+agg_trans["States"]=agg_trans["States"].str.replace("andaman-&-nicobar-islands","Andaman & Nicobar")
+agg_trans["States"]=agg_trans["States"].str.replace("-"," ")
+agg_trans["States"]=agg_trans["States"].str.title()
+agg_trans["States"]=agg_trans["States"].str.replace("Dadra & Nagar Haveli & Daman & Diu","Dadra and Nagar Haveli and Daman and Diu")
+
+# aggregated user
+path2="C:/Users/sandh/OneDrive/Desktop/phonepay project/pulse/data/aggregated/user/country/india/state/"
+
+agg_trans_list = os.listdir(path2)
+columns1={"States":[], "Years":[], "Quarter":[], "Brand":[], "Trans_count":[], "Percentage":[] }
+for states in agg_trans_list:
+    states_path = path2 + states + "/"
+    agg_year_list = os.listdir(states_path)
+    
+    for year in agg_year_list:
+        year_path = states_path + year + "/"
+        agg_file_list = os.listdir(year_path)
+         
+        for file in agg_file_list:
+            file_path=year_path+file
+            data=open(file_path,"r")
+            Y=json.load(data)
+            
+            try:
+
+                for i in Y["data"]["usersByDevice"]:
+                    brand=i["brand"]
+                    count=i["count"]
+                    percentage=i["percentage"]
+                    columns1["Brand"].append(brand)
+                    columns1["Trans_count"].append(count)
+                    columns1["Percentage"].append(percentage)
+                    columns1["States"].append(states)
+                    columns1["Years"].append(year)
+                    columns1["Quarter"].append(int(file.strip(".json")))
+            
+            except:
+                pass
+
+
+agg_user=pd.DataFrame(columns1)
+
+agg_user["States"]=agg_user["States"].str.replace("andaman-&-nicobar-islands","Andaman & Nicobar")
+agg_user["States"]=agg_user["States"].str.replace("-"," ")
+agg_user["States"]=agg_user["States"].str.title()
+agg_user["States"]=agg_user["States"].str.replace("Dadra & Nagar Haveli & Daman & Diu","Dadra and Nagar Haveli and Daman and Diu")
+
+#map_trans
+path3="C:/Users/sandh/OneDrive/Desktop/phonepay project/pulse/data/map/transaction/hover/country/india/state/"
+map_trans_list = os.listdir(path3)
+
+columns2={"States":[], "Years":[], "Quarter":[], "District":[], "Trans_count":[], "Trans_amount":[] }
+
+
+for states in map_trans_list:
+    states_path= path3+states+"/"
+    map_year_list=os.listdir(states_path)
+    for year in map_year_list:
+        year_path= states_path+year+"/"
+        map_file_list=os.listdir(year_path)
+        for file in map_file_list:
+            file_path=year_path+file
+            data=open(file_path,"r")
+            X1=json.load(data)
+            for i in X1["data"]["hoverDataList"]:
+                district=i["name"]
+                count=i["metric"][0]["count"]
+                amount=i["metric"][0]["amount"]
+                columns2["District"].append(district)
+                columns2["Trans_count"].append(count)
+                columns2["Trans_amount"].append(amount)
+                columns2["States"].append(states)
+                columns2["Years"].append(year)
+                columns2["Quarter"].append(int(file.strip(".json")))
+
+map_trans=pd.DataFrame(columns2)
+
+map_trans["States"]=map_trans["States"].str.replace("andaman-&-nicobar-islands","Andaman & Nicobar")
+map_trans["States"]=map_trans["States"].str.replace("-"," ")
+map_trans["States"]=map_trans["States"].str.title()
+map_trans["States"]=map_trans["States"].str.replace("Dadra & Nagar Haveli & Daman & Diu","Dadra and Nagar Haveli and Daman and Diu")
+
+#map users
+path4 = "C:/Users/sandh/OneDrive/Desktop/phonepay project/pulse/data/map/user/hover/country/india/state/"
+map_user_list = os.listdir(path4)
+
+columns3 = {"States": [], "Years": [], "Quarter": [], "District": [], "Registered_users": [], "AppOpens": []}
+
+for states in map_user_list:
+    states_path = path4 + states + "/"
+    map_year_list = os.listdir(states_path)
+    for year in map_year_list:
+        year_path = states_path + year + "/"
+        map_file_list = os.listdir(year_path)
+        for file in map_file_list:
+            file_path = year_path + file
+            with open(file_path, "r") as data_file:
+                Y1 = json.load(data_file)
+                for district, details in Y1["data"]["hoverData"].items():
+                    Registered_users = details.get("registeredUsers", 0)
+                    App_opens = details.get("appOpens", 0)
+                    columns3["District"].append(district)
+                    columns3["Registered_users"].append(Registered_users)
+                    columns3["AppOpens"].append(App_opens)
+                    columns3["States"].append(states)
+                    columns3["Years"].append(year)
+                    columns3["Quarter"].append(int(file.strip(".json")))
+map_users=pd.DataFrame(columns3)
+
+map_users["States"]=map_users["States"].str.replace("andaman-&-nicobar-islands","Andaman & Nicobar")
+map_users["States"]=map_users["States"].str.replace("-"," ")
+map_users["States"]=map_users["States"].str.title()
+map_users["States"]=map_users["States"].str.replace("Dadra & Nagar Haveli & Daman & Diu","Dadra and Nagar Haveli and Daman and Diu")
+
+#top transaction
+path5 = "C:/Users/sandh/OneDrive/Desktop/phonepay project/pulse/data/top/transaction/country/india/state/"
+top_trans_list = os.listdir(path5)
+
+columns5 = {"States": [], "Years": [], "Quarter": [], "Pincode": [], "Trans_count": [], "Trans_amount": []}
+
+for states in top_trans_list:
+    states_path = path5 + states + "/"
+    map_year_list = os.listdir(states_path)
+    for year in map_year_list:
+        year_path = states_path + year + "/"
+        map_file_list = os.listdir(year_path)
+        for file in map_file_list:
+            file_path = year_path + file
+            with open(file_path, "r") as data_file:
+                X2 = json.load(data_file)
+                for i in X2["data"]["pincodes"]:
+                    entity_name=i["entityName"]
+                    count=i["metric"]["count"]
+                    amount=i["metric"]["amount"]
+                    columns5["Pincode"].append(entity_name)
+                    columns5["Trans_count"].append(count)
+                    columns5["Trans_amount"].append(amount)
+                    columns5["States"].append(states)
+                    columns5["Years"].append(year)
+                    columns5["Quarter"].append(int(file.strip(".json")))
+
+top_trans=pd.DataFrame(columns5)
+
+top_trans["States"]=top_trans["States"].str.replace("andaman-&-nicobar-islands","Andaman & Nicobar")
+top_trans["States"]=top_trans["States"].str.replace("-"," ")
+top_trans["States"]=top_trans["States"].str.title()
+top_trans["States"]=top_trans["States"].str.replace("Dadra & Nagar Haveli & Daman & Diu","Dadra and Nagar Haveli and Daman and Diu")
+
+#top_user
+path6 = "C:/Users/sandh/OneDrive/Desktop/phonepay project/pulse/data/top/user/country/india/state/"
+top_user_list = os.listdir(path6)
+
+columns6 = {"States":[], "Years":[], "Quarter":[], "Pincode":[], "Registered_users":[]}
+
+for state in top_user_list:
+    cur_states = path6+state+"/"
+    top_year_list = os.listdir(cur_states)
+
+    for year in top_year_list:
+        cur_years = cur_states+year+"/"
+        top_file_list = os.listdir(cur_years)
+
+        for file in top_file_list:
+            cur_files = cur_years+file
+            data = open(cur_files,"r")
+            Y2 = json.load(data)
+
+            for i in Y2["data"]["pincodes"]:
+                name = i["name"]
+                registereduser = i["registeredUsers"]
+                columns6["Pincode"].append(name)
+                columns6["Registered_users"].append(registereduser)
+                columns6["States"].append(state)
+                columns6["Years"].append(year)
+                columns6["Quarter"].append(int(file.strip(".json")))
+
+top_user = pd.DataFrame(columns6)
+
+top_user["States"]=top_user["States"].str.replace("andaman-&-nicobar-islands","Andaman & Nicobar")
+top_user["States"]=top_user["States"].str.replace("-"," ")
+top_user["States"]=top_user["States"].str.title()
+top_user["States"]=top_user["States"].str.replace("Dadra & Nagar Haveli & Daman & Diu","Dadra and Nagar Haveli and Daman and Diu") 
+
+
+
+       
+
 # Establish database connection
 db = mysql.connector.connect(
     host="localhost",
